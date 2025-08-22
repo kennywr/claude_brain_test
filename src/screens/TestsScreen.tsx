@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import ReactionTimeTest from '../components/tests/ReactionTimeTest';
+import NBackTest from '../components/tests/NBackTest';
 import { addResult } from '../utils/storage';
 import { TEST_DEFINITIONS } from '../utils/testUtils';
 
@@ -34,6 +35,15 @@ export default function TestsScreen() {
     );
   }
 
+  if (activeTest === 'nback') {
+    return (
+      <NBackTest
+        onComplete={(result) => handleTestComplete('nback', result)}
+        onCancel={handleTestCancel}
+      />
+    );
+  }
+
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
@@ -50,6 +60,8 @@ export default function TestsScreen() {
               onPress={() => {
                 if (test.id === 'rt') {
                   setActiveTest('rt');
+                } else if (test.id === 'nback') {
+                  setActiveTest('nback');
                 } else {
                   Alert.alert('Coming Soon', `${test.name} test is being developed.`);
                 }
@@ -61,7 +73,7 @@ export default function TestsScreen() {
               </View>
               <Text style={styles.testDescription}>{test.description}</Text>
               <Text style={styles.testStatus}>
-                {test.id === 'rt' ? 'Available' : 'Coming Soon'}
+                {test.id === 'rt' || test.id === 'nback' ? 'Available' : 'Coming Soon'}
               </Text>
             </TouchableOpacity>
           ))}
