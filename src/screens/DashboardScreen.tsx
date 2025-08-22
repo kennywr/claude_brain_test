@@ -50,9 +50,15 @@ export default function DashboardScreen() {
     const testResults = results[testId];
     if (!testResults || testResults.length === 0) return null;
     
-    const data = testResults.slice(-10).map((result, index) => scoreForChart(testId, result));
+    // Take last 10 results for the chart
+    const recentResults = testResults.slice(-10);
+    const data = recentResults.map(result => scoreForChart(testId, result));
+    
+    // Generate labels based on number of tests and time span
+    const labels = generateLabels(recentResults);
+    
     return {
-      labels: data.map((_, i) => `${i + 1}`),
+      labels: labels,
       datasets: [{
         data: data,
         strokeWidth: 2,
@@ -62,6 +68,32 @@ export default function DashboardScreen() {
         }
       }]
     };
+  };
+
+  const generateLabels = (results: any[]) => {
+    if (results.length === 0) return [];
+    
+    const now = new Date();
+    const firstDate = new Date(results[0].when);
+    const daysDiff = Math.floor((now.getTime() - firstDate.getTime()) / (1000 * 60 * 60 * 24));
+    
+    return results.map((result, index) => {
+      const date = new Date(result.when);
+      
+      // If tests span less than 7 days, show date (M/D)
+      if (daysDiff <= 7 || results.length <= 5) {
+        return `${date.getMonth() + 1}/${date.getDate()}`;
+      }
+      // If tests span less than 30 days, show week info
+      else if (daysDiff <= 30) {
+        const weekNum = Math.floor(daysDiff / 7) + 1;
+        return index % 2 === 0 ? `W${weekNum}` : '';
+      }
+      // For longer spans, show month/day less frequently
+      else {
+        return index % 3 === 0 ? `${date.getMonth() + 1}/${date.getDate()}` : '';
+      }
+    });
   };
 
   const chartConfig = {
@@ -78,6 +110,13 @@ export default function DashboardScreen() {
       r: '3',
       strokeWidth: '1',
       stroke: '#3B82F6'
+    },
+    propsForLabels: {
+      fontSize: 10,
+    },
+    formatXLabel: (value: any) => {
+      // Keep the label as is, since we're already formatting it
+      return value;
     }
   };
 
@@ -151,6 +190,9 @@ export default function DashboardScreen() {
                         withOuterLines={false}
                         withVerticalLines={false}
                         withHorizontalLines={false}
+                        fromZero={false}
+                        withVerticalLabels={true}
+                        withHorizontalLabels={true}
                       />
                     </View>
                   ) : (

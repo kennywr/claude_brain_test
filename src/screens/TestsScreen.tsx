@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'rea
 import { SafeAreaView } from 'react-native-safe-area-context';
 import ReactionTimeTest from '../components/tests/ReactionTimeTest';
 import NBackTest from '../components/tests/NBackTest';
+import DigitSpanTest from '../components/tests/DigitSpanTest';
 import { addResult } from '../utils/storage';
 import { TEST_DEFINITIONS } from '../utils/testUtils';
 
@@ -14,9 +15,10 @@ export default function TestsScreen() {
   const handleTestComplete = async (testId: string, result: any) => {
     try {
       await addResult(testId, result);
-      Alert.alert('Success', 'Test result saved successfully!', [
-        { text: 'OK', onPress: () => setActiveTest(null) }
-      ]);
+      // Automatically return to test selection
+      setActiveTest(null);
+      // Show brief success message
+      Alert.alert('Success!', 'Test result saved successfully.');
     } catch (error) {
       Alert.alert('Error', 'Failed to save test result. Please try again.');
     }
@@ -44,6 +46,15 @@ export default function TestsScreen() {
     );
   }
 
+  if (activeTest === 'digit') {
+    return (
+      <DigitSpanTest
+        onComplete={(result) => handleTestComplete('digit', result)}
+        onCancel={handleTestCancel}
+      />
+    );
+  }
+
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
@@ -62,6 +73,8 @@ export default function TestsScreen() {
                   setActiveTest('rt');
                 } else if (test.id === 'nback') {
                   setActiveTest('nback');
+                } else if (test.id === 'digit') {
+                  setActiveTest('digit');
                 } else {
                   Alert.alert('Coming Soon', `${test.name} test is being developed.`);
                 }
@@ -73,7 +86,7 @@ export default function TestsScreen() {
               </View>
               <Text style={styles.testDescription}>{test.description}</Text>
               <Text style={styles.testStatus}>
-                {test.id === 'rt' || test.id === 'nback' ? 'Available' : 'Coming Soon'}
+                {test.id === 'rt' || test.id === 'nback' || test.id === 'digit' ? 'Available' : 'Coming Soon'}
               </Text>
             </TouchableOpacity>
           ))}

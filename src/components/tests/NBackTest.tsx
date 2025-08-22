@@ -143,10 +143,13 @@ export default function NBackTest({ onComplete, onCancel }: NBackTestProps) {
 
           <View style={styles.buttonContainer}>
             <TouchableOpacity style={styles.primaryButton} onPress={saveResult}>
-              <Text style={styles.primaryButtonText}>Save Result</Text>
+              <Text style={styles.primaryButtonText}>Save & Continue</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.secondaryButton} onPress={restart}>
               <Text style={styles.secondaryButtonText}>Try Again</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.tertiaryButton} onPress={onCancel}>
+              <Text style={styles.tertiaryButtonText}>Back to Tests</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -283,6 +286,20 @@ const styles = StyleSheet.create({
     color: '#374151',
     fontSize: 16,
     fontWeight: '600',
+  },
+  tertiaryButton: {
+    backgroundColor: 'transparent',
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 8,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#d1d5db',
+  },
+  tertiaryButtonText: {
+    color: '#6b7280',
+    fontSize: 14,
+    fontWeight: '500',
   },
   matchButton: {
     backgroundColor: '#8B5CF6',
