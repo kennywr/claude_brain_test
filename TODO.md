@@ -11,16 +11,16 @@ Converting web-based cognitive testing app to React Native/Expo mobile app.
 - [x] Create AsyncStorage-based data persistence system for test results
 - [x] Convert Reaction Time test to React Native components
 - [x] Convert 2-Back working memory test to React Native
+- [x] Convert Digit Span test to React Native
+- [x] Convert Stroop test to React Native
 - [x] Implement dashboard with test overview and progress charts
 - [x] Test app functionality and fix any mobile-specific issues (basic testing complete)
 - [x] Set up git repository and GitHub integration
 
 ### 🔄 Next Priority
-- [ ] Convert Digit Span test to React Native
+- [ ] Create history view with charts using react-native-chart-kit
 
 ### ⏳ Pending
-- [ ] Convert Stroop test to React Native
-- [ ] Create history view with charts using react-native-chart-kit
 - [ ] Add proper styling and mobile-optimized UI components
 
 ## Test Components to Build

@@ -4,6 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import ReactionTimeTest from '../components/tests/ReactionTimeTest';
 import NBackTest from '../components/tests/NBackTest';
 import DigitSpanTest from '../components/tests/DigitSpanTest';
+import StroopTest from '../components/tests/StroopTest';
 import { addResult } from '../utils/storage';
 import { TEST_DEFINITIONS } from '../utils/testUtils';
 
@@ -55,6 +56,15 @@ export default function TestsScreen() {
     );
   }
 
+  if (activeTest === 'stroop') {
+    return (
+      <StroopTest
+        onComplete={(result) => handleTestComplete('stroop', result)}
+        onCancel={handleTestCancel}
+      />
+    );
+  }
+
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
@@ -75,6 +85,8 @@ export default function TestsScreen() {
                   setActiveTest('nback');
                 } else if (test.id === 'digit') {
                   setActiveTest('digit');
+                } else if (test.id === 'stroop') {
+                  setActiveTest('stroop');
                 } else {
                   Alert.alert('Coming Soon', `${test.name} test is being developed.`);
                 }
@@ -86,7 +98,7 @@ export default function TestsScreen() {
               </View>
               <Text style={styles.testDescription}>{test.description}</Text>
               <Text style={styles.testStatus}>
-                {test.id === 'rt' || test.id === 'nback' || test.id === 'digit' ? 'Available' : 'Coming Soon'}
+                Available
               </Text>
             </TouchableOpacity>
           ))}
