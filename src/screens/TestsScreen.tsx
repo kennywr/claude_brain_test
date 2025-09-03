@@ -5,10 +5,11 @@ import ReactionTimeTest from '../components/tests/ReactionTimeTest';
 import NBackTest from '../components/tests/NBackTest';
 import DigitSpanTest from '../components/tests/DigitSpanTest';
 import StroopTest from '../components/tests/StroopTest';
+import EnhancedAnimalNamingTest from '../components/tests/EnhancedAnimalNamingTest';
 import { addResult } from '../utils/storage';
 import { TEST_DEFINITIONS } from '../utils/testUtils';
 
-type ActiveTest = null | 'rt' | 'nback' | 'digit' | 'stroop';
+type ActiveTest = null | 'rt' | 'nback' | 'digit' | 'stroop' | 'animal';
 
 export default function TestsScreen() {
   const [activeTest, setActiveTest] = useState<ActiveTest>(null);
@@ -65,6 +66,15 @@ export default function TestsScreen() {
     );
   }
 
+  if (activeTest === 'animal') {
+    return (
+      <EnhancedAnimalNamingTest
+        onComplete={(result) => handleTestComplete('animal', result)}
+        onCancel={handleTestCancel}
+      />
+    );
+  }
+
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
@@ -87,6 +97,8 @@ export default function TestsScreen() {
                   setActiveTest('digit');
                 } else if (test.id === 'stroop') {
                   setActiveTest('stroop');
+                } else if (test.id === 'animal') {
+                  setActiveTest('animal');
                 } else {
                   Alert.alert('Coming Soon', `${test.name} test is being developed.`);
                 }

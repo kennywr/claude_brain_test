@@ -31,6 +31,9 @@ export function scoreForChart(testId: string, result: any): number {
       return result.maxSpan || 0;
     case 'stroop':
       return result.score || 0;
+    case 'animal':
+      // Use difficulty-adjusted score if available, fallback to raw score
+      return result.score || result.rawScore || 0;
     default:
       return 0;
   }
@@ -60,5 +63,11 @@ export const TEST_DEFINITIONS = [
     name: 'Stroop Test',
     description: 'Assesses attention and inhibition',
     color: '#F59E0B'
+  },
+  {
+    id: 'animal',
+    name: 'Animal Naming',
+    description: 'Tests visual recognition and semantic memory',
+    color: '#7C3AED'
   }
 ];
