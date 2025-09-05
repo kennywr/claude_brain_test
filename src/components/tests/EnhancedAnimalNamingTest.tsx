@@ -7,6 +7,8 @@ import {
   StyleSheet,
   ActivityIndicator,
   ScrollView,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
 import { Image } from 'expo-image';
 import { AnimalData } from '../../data/animalDatabase';
@@ -347,77 +349,88 @@ export default function EnhancedAnimalNamingTest({ onComplete, onCancel }: Enhan
   if (!currentAnimal) return null;
 
   return (
-    <View style={styles.container}>
-      <View style={styles.testHeader}>
-        <Text style={styles.progressText}>
-          Animal {currentIndex + 1} / {animals.length}
-        </Text>
-        <Text style={styles.difficultyIndicator}>
-          Level {currentAnimal.difficulty} • {currentAnimal.category}
-        </Text>
-      </View>
-      
-      <View style={styles.imageContainer}>
-        {imageUrls[currentAnimal.id] ? (
-          <>
-            <Image 
-              source={{ uri: imageUrls[currentAnimal.id] }} 
-              style={styles.animalImage}
-              contentFit="cover"
-            />
-            <TouchableOpacity 
-              style={styles.reloadButton}
-              onPress={reloadCurrentImage}
-              disabled={isReloadingImage}
-            >
-              {isReloadingImage ? (
-                <ActivityIndicator size="small" color="#7c3aed" />
-              ) : (
-                <Text style={styles.reloadButtonText}>Incorrect Photo?</Text>
-              )}
-            </TouchableOpacity>
-          </>
-        ) : (
-          <View style={styles.imagePlaceholder}>
-            <ActivityIndicator size="large" color="#7c3aed" />
-          </View>
-        )}
-      </View>
-      
-      <View style={styles.inputContainer}>
-        <Text style={styles.questionText}>What animal is this?</Text>
-        <TextInput
-          ref={inputRef}
-          style={styles.textInput}
-          value={currentInput}
-          onChangeText={setCurrentInput}
-          placeholder="Type the animal name"
-          placeholderTextColor="#9ca3af"
-          autoCapitalize="none"
-          autoCorrect={false}
-          onSubmitEditing={submitAnswer}
-          returnKeyType="done"
-        />
-      </View>
-      
-      <View style={styles.buttonContainer}>
-        <TouchableOpacity 
-          style={[
-            styles.submitButton, 
-            currentInput.trim() === '' && styles.submitButtonDisabled
-          ]} 
-          onPress={submitAnswer}
-          disabled={currentInput.trim() === ''}
-        >
-          <Text style={[
-            styles.submitButtonText,
-            currentInput.trim() === '' && styles.submitButtonTextDisabled
-          ]}>
-            {currentIndex + 1 === animals.length ? 'Finish' : 'Submit'}
+    <KeyboardAvoidingView 
+      style={styles.container}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 100 : 0}
+    >
+      <ScrollView 
+        style={styles.scrollContainer}
+        contentContainerStyle={styles.testScrollContent}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+      >
+        <View style={styles.testHeader}>
+          <Text style={styles.progressText}>
+            Animal {currentIndex + 1} / {animals.length}
           </Text>
-        </TouchableOpacity>
-      </View>
-    </View>
+          <Text style={styles.difficultyIndicator}>
+            Level {currentAnimal.difficulty} • {currentAnimal.category}
+          </Text>
+        </View>
+        
+        <View style={styles.imageContainer}>
+          {imageUrls[currentAnimal.id] ? (
+            <>
+              <Image 
+                source={{ uri: imageUrls[currentAnimal.id] }} 
+                style={styles.animalImage}
+                contentFit="cover"
+              />
+              <TouchableOpacity 
+                style={styles.reloadButton}
+                onPress={reloadCurrentImage}
+                disabled={isReloadingImage}
+              >
+                {isReloadingImage ? (
+                  <ActivityIndicator size="small" color="#7c3aed" />
+                ) : (
+                  <Text style={styles.reloadButtonText}>Incorrect Photo?</Text>
+                )}
+              </TouchableOpacity>
+            </>
+          ) : (
+            <View style={styles.imagePlaceholder}>
+              <ActivityIndicator size="large" color="#7c3aed" />
+            </View>
+          )}
+        </View>
+        
+        <View style={styles.inputContainer}>
+          <Text style={styles.questionText}>What animal is this?</Text>
+          <TextInput
+            ref={inputRef}
+            style={styles.textInput}
+            value={currentInput}
+            onChangeText={setCurrentInput}
+            placeholder="Type the animal name"
+            placeholderTextColor="#9ca3af"
+            autoCapitalize="none"
+            autoCorrect={false}
+            onSubmitEditing={submitAnswer}
+            returnKeyType="done"
+          />
+        </View>
+        
+        <View style={styles.buttonContainer}>
+          <TouchableOpacity 
+            style={[
+              styles.submitButton, 
+              currentInput.trim() === '' && styles.submitButtonDisabled
+            ]} 
+            onPress={submitAnswer}
+            disabled={currentInput.trim() === ''}
+          >
+            <Text style={[
+              styles.submitButtonText,
+              currentInput.trim() === '' && styles.submitButtonTextDisabled
+            ]}>
+              {currentIndex + 1 === animals.length ? 'Finish' : 'Submit'}
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 
@@ -433,6 +446,11 @@ const styles = StyleSheet.create({
   scrollContent: {
     flexGrow: 1,
     paddingBottom: 20,
+  },
+  testScrollContent: {
+    flexGrow: 1,
+    paddingBottom: 20,
+    minHeight: '100%',
   },
   loadingContainer: {
     flex: 1,
@@ -516,7 +534,6 @@ const styles = StyleSheet.create({
     textTransform: 'capitalize',
   },
   imageContainer: {
-    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     marginVertical: 20,
@@ -528,19 +545,22 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 2,
+    minHeight: 200,
   },
   animalImage: {
-    width: 280,
-    height: 280,
+    width: 250,
+    height: 250,
     borderRadius: 12,
+    maxWidth: '100%',
   },
   imagePlaceholder: {
-    width: 280,
-    height: 280,
+    width: 250,
+    height: 250,
     borderRadius: 12,
     backgroundColor: '#f3f4f6',
     justifyContent: 'center',
     alignItems: 'center',
+    maxWidth: '100%',
   },
   reloadButton: {
     marginTop: 12,

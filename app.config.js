@@ -7,7 +7,8 @@ export default {
   expo: {
     name: "BraintestMobile",
     slug: "BraintestMobile",
-    version: "1.0.0",
+    owner: "kennywr",
+    version: "1.4.1",
     orientation: "portrait",
     icon: "./assets/icon.png",
     userInterfaceStyle: "light",
@@ -21,6 +22,7 @@ export default {
       supportsTablet: true
     },
     android: {
+      package: "com.kennywr.braintestmobile",
       adaptiveIcon: {
         foregroundImage: "./assets/adaptive-icon.png",
         backgroundColor: "#ffffff"
@@ -32,6 +34,9 @@ export default {
     },
     extra: {
       pexelsApiKey: process.env.PEXELS_API_KEY,
+      eas: {
+        projectId: "c1cf6eae-5369-4b2b-965c-bfb3363bba22"
+      }
     },
   },
 };

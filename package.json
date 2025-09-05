@@ -1,6 +1,6 @@
 {
   "name": "braintestmobile",
-  "version": "1.0.0",
+  "version": "1.4.1",
   "main": "index.ts",
   "scripts": {
     "start": "expo start",
@@ -27,7 +27,8 @@
     "react-native-screens": "~4.11.1",
     "react-native-svg": "15.11.2",
     "react-native-vector-icons": "^10.3.0",
-    "react-native-web": "^0.20.0"
+    "react-native-web": "^0.20.0",
+    "expo-dev-client": "~5.2.4"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",

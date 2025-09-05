@@ -21,7 +21,7 @@ export default function DigitSpanTest({ onComplete, onCancel }: DigitSpanTestPro
   const [sequence, setSequence] = useState('');
   const [input, setInput] = useState('');
   const [best, setBest] = useState(0);
-  const timeoutRef = useRef<number>();
+  const timeoutRef = useRef<NodeJS.Timeout>();
   const inputRef = useRef<TextInput>(null);
 
   // Generate random digit sequence
@@ -30,14 +30,15 @@ export default function DigitSpanTest({ onComplete, onCancel }: DigitSpanTestPro
   };
 
   // Start a new trial
-  const start = () => {
-    const seq = generate(span);
+  const start = (currentSpan?: number) => {
+    const spanToUse = currentSpan || span;
+    const seq = generate(spanToUse);
     setSequence(seq);
     setInput('');
     setPhase('show');
     
     // Show sequence for span * 500ms (minimum 1500ms)
-    const showTime = Math.max(1500, span * 500);
+    const showTime = Math.max(1500, spanToUse * 500);
     timeoutRef.current = setTimeout(() => {
       setPhase('recall');
       // Auto-focus input after a brief delay
@@ -54,7 +55,7 @@ export default function DigitSpanTest({ onComplete, onCancel }: DigitSpanTestPro
       const nextSpan = span + 1;
       setBest(prev => Math.max(prev, span));
       setSpan(nextSpan);
-      start(); // Continue with next level
+      start(nextSpan); // Continue with next level, passing the new span
     } else {
       setPhase('result');
     }
@@ -140,7 +141,7 @@ export default function DigitSpanTest({ onComplete, onCancel }: DigitSpanTestPro
           </Text>
 
           <View style={styles.buttonContainer}>
-            <TouchableOpacity style={styles.primaryButton} onPress={start}>
+            <TouchableOpacity style={styles.primaryButton} onPress={() => start()}>
               <Text style={styles.primaryButtonText}>Start Test</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.secondaryButton} onPress={onCancel}>

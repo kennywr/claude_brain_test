@@ -6,6 +6,9 @@ import {
   TouchableOpacity,
   StyleSheet,
   Image,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
 } from 'react-native';
 
 interface AnimalNamingTestProps {
@@ -218,49 +221,59 @@ export default function AnimalNamingTest({ onComplete, onCancel }: AnimalNamingT
   const currentAnimal = ANIMALS[currentIndex];
   
   return (
-    <View style={styles.container}>
-      <View style={styles.testHeader}>
-        <Text style={styles.progressText}>Animal {currentIndex + 1} / {ANIMALS.length}</Text>
-      </View>
-      
-      <View style={styles.imageContainer}>
-        <Image source={{ uri: currentAnimal.imageUri }} style={styles.animalImage} />
-      </View>
-      
-      <View style={styles.inputContainer}>
-        <Text style={styles.questionText}>What animal is this?</Text>
-        <TextInput
-          ref={inputRef}
-          style={styles.textInput}
-          value={currentInput}
-          onChangeText={setCurrentInput}
-          placeholder="Type the animal name"
-          placeholderTextColor="#9ca3af"
-          autoCapitalize="none"
-          autoCorrect={false}
-          onSubmitEditing={submitAnswer}
-          returnKeyType="done"
-        />
-      </View>
-      
-      <View style={styles.buttonContainer}>
-        <TouchableOpacity 
-          style={[
-            styles.submitButton, 
-            currentInput.trim() === '' && styles.submitButtonDisabled
-          ]} 
-          onPress={submitAnswer}
-          disabled={currentInput.trim() === ''}
-        >
-          <Text style={[
-            styles.submitButtonText,
-            currentInput.trim() === '' && styles.submitButtonTextDisabled
-          ]}>
-            {currentIndex + 1 === ANIMALS.length ? 'Finish' : 'Submit'}
-          </Text>
-        </TouchableOpacity>
-      </View>
-    </View>
+    <KeyboardAvoidingView 
+      style={styles.container}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 100 : 0}
+    >
+      <ScrollView 
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+      >
+        <View style={styles.testHeader}>
+          <Text style={styles.progressText}>Animal {currentIndex + 1} / {ANIMALS.length}</Text>
+        </View>
+        
+        <View style={styles.imageContainer}>
+          <Image source={{ uri: currentAnimal.imageUri }} style={styles.animalImage} />
+        </View>
+        
+        <View style={styles.inputContainer}>
+          <Text style={styles.questionText}>What animal is this?</Text>
+          <TextInput
+            ref={inputRef}
+            style={styles.textInput}
+            value={currentInput}
+            onChangeText={setCurrentInput}
+            placeholder="Type the animal name"
+            placeholderTextColor="#9ca3af"
+            autoCapitalize="none"
+            autoCorrect={false}
+            onSubmitEditing={submitAnswer}
+            returnKeyType="done"
+          />
+        </View>
+        
+        <View style={styles.buttonContainer}>
+          <TouchableOpacity 
+            style={[
+              styles.submitButton, 
+              currentInput.trim() === '' && styles.submitButtonDisabled
+            ]} 
+            onPress={submitAnswer}
+            disabled={currentInput.trim() === ''}
+          >
+            <Text style={[
+              styles.submitButtonText,
+              currentInput.trim() === '' && styles.submitButtonTextDisabled
+            ]}>
+              {currentIndex + 1 === ANIMALS.length ? 'Finish' : 'Submit'}
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 
@@ -269,6 +282,10 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#f8f9fa',
     padding: 20,
+  },
+  scrollContent: {
+    flexGrow: 1,
+    paddingBottom: 20,
   },
   card: {
     backgroundColor: '#ffffff',
@@ -324,7 +341,6 @@ const styles = StyleSheet.create({
     color: '#6b7280',
   },
   imageContainer: {
-    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     marginVertical: 20,
@@ -336,6 +352,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 2,
+    minHeight: 200,
   },
   animalImage: {
     width: 250,
