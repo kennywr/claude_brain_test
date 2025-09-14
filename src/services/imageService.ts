@@ -1,6 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Constants from 'expo-constants';
 import { AnimalData } from '../data/animalDatabase';
+import AnimalAssets from './animalAssets';
 
 // Pexels API configuration
 const PEXELS_API_KEY = Constants.expoConfig?.extra?.pexelsApiKey || '';
@@ -8,7 +9,9 @@ const PEXELS_BASE_URL = 'https://api.pexels.com/v1';
 
 // Cache configuration
 const IMAGE_CACHE_PREFIX = '@animal_images_';
+const WIKIPEDIA_CACHE_PREFIX = '@wiki_images_';
 const CACHE_EXPIRY_HOURS = 24; // Cache images for 24 hours
+const WIKIPEDIA_CACHE_EXPIRY_HOURS = 48; // Cache Wikipedia images longer (more stable URLs)
 
 interface CachedImage {
   url: string;
@@ -47,6 +50,38 @@ interface PexelsResponse {
   next_page?: string;
 }
 
+interface WikipediaImage {
+  title: string;
+  url: string;
+  width: number;
+  height: number;
+}
+
+interface WikipediaSearchResponse {
+  query?: {
+    pages?: {
+      [key: string]: {
+        title: string;
+        images?: Array<{ title: string }>;
+      };
+    };
+  };
+}
+
+interface WikipediaImageInfoResponse {
+  query?: {
+    pages?: {
+      [key: string]: {
+        imageinfo?: Array<{
+          url: string;
+          width: number;
+          height: number;
+        }>;
+      };
+    };
+  };
+}
+
 export class ImageService {
   private static instance: ImageService;
   
@@ -58,11 +93,10 @@ export class ImageService {
   }
 
   // Get local asset path for core animals
-  public getLocalAssetPath(animal: AnimalData): string | null {
-    if (animal.localAsset) {
-      // In a real app, you'd have these assets in your bundle
-      // Since we don't have actual local assets, return null to use Pexels API
-      return null;
+  public getLocalAssetPath(animal: AnimalData): any | null {
+    if (animal.localAsset && AnimalAssets[animal.localAsset as keyof typeof AnimalAssets]) {
+      // Return the imported asset from our registry
+      return AnimalAssets[animal.localAsset as keyof typeof AnimalAssets];
     }
     return null;
   }
@@ -105,6 +139,121 @@ export class ImageService {
       await AsyncStorage.setItem(cacheKey, JSON.stringify(cacheData));
     } catch (error) {
       console.warn('Error caching image:', error);
+    }
+  }
+
+  // Get cached Wikipedia image URL
+  private async getCachedWikipediaUrl(searchTerm: string): Promise<string | null> {
+    try {
+      const cacheKey = WIKIPEDIA_CACHE_PREFIX + searchTerm;
+      const cachedData = await AsyncStorage.getItem(cacheKey);
+      
+      if (cachedData) {
+        const cached: CachedImage = JSON.parse(cachedData);
+        const now = Date.now();
+        const expiryTime = cached.timestamp + (WIKIPEDIA_CACHE_EXPIRY_HOURS * 60 * 60 * 1000);
+        
+        if (now < expiryTime) {
+          return cached.url;
+        } else {
+          // Cache expired, remove it
+          await AsyncStorage.removeItem(cacheKey);
+        }
+      }
+    } catch (error) {
+      console.warn('Error reading Wikipedia image cache:', error);
+    }
+    
+    return null;
+  }
+
+  // Cache Wikipedia image URL
+  private async cacheWikipediaUrl(searchTerm: string, url: string): Promise<void> {
+    try {
+      const cacheKey = WIKIPEDIA_CACHE_PREFIX + searchTerm;
+      const cacheData: CachedImage = {
+        url,
+        timestamp: Date.now(),
+        searchTerm
+      };
+      
+      await AsyncStorage.setItem(cacheKey, JSON.stringify(cacheData));
+    } catch (error) {
+      console.warn('Error caching Wikipedia image:', error);
+    }
+  }
+
+  // Fetch image from Wikipedia Commons API
+  private async fetchFromWikipedia(searchTerm: string): Promise<string | null> {
+    try {
+      console.log(`Wikipedia: Searching for "${searchTerm}"`);
+      
+      // First, search for pages about the animal
+      const searchUrl = `https://en.wikipedia.org/w/api.php?action=query&format=json&prop=images&titles=${encodeURIComponent(searchTerm)}&imlimit=5&origin=*`;
+      
+      const searchResponse = await fetch(searchUrl);
+      if (!searchResponse.ok) {
+        throw new Error(`Wikipedia search error: ${searchResponse.status}`);
+      }
+      
+      const searchData: WikipediaSearchResponse = await searchResponse.json();
+      const pages = searchData.query?.pages;
+      
+      if (!pages) {
+        console.log(`Wikipedia: No pages found for "${searchTerm}"`);
+        return null;
+      }
+      
+      // Get the first page and its images
+      const firstPage = Object.values(pages)[0];
+      const images = firstPage?.images;
+      
+      if (!images || images.length === 0) {
+        console.log(`Wikipedia: No images found for "${searchTerm}"`);
+        return null;
+      }
+      
+      // Filter for likely animal images (exclude icons, logos, etc.)
+      const animalImages = images.filter(img => {
+        const title = img.title.toLowerCase();
+        return title.includes('.jpg') || title.includes('.jpeg') || title.includes('.png');
+      }).slice(0, 3); // Take first 3 candidates
+      
+      if (animalImages.length === 0) {
+        console.log(`Wikipedia: No suitable image files found for "${searchTerm}"`);
+        return null;
+      }
+      
+      // Get detailed info for the first suitable image
+      const imageTitle = animalImages[0].title;
+      const infoUrl = `https://en.wikipedia.org/w/api.php?action=query&format=json&prop=imageinfo&titles=${encodeURIComponent(imageTitle)}&iiprop=url|size&iiurlwidth=400&origin=*`;
+      
+      const infoResponse = await fetch(infoUrl);
+      if (!infoResponse.ok) {
+        throw new Error(`Wikipedia image info error: ${infoResponse.status}`);
+      }
+      
+      const infoData: WikipediaImageInfoResponse = await infoResponse.json();
+      const imagePages = infoData.query?.pages;
+      
+      if (!imagePages) {
+        console.log(`Wikipedia: No image info found for "${imageTitle}"`);
+        return null;
+      }
+      
+      const imageInfo = Object.values(imagePages)[0]?.imageinfo?.[0];
+      if (!imageInfo?.url) {
+        console.log(`Wikipedia: No image URL found for "${imageTitle}"`);
+        return null;
+      }
+      
+      console.log(`Wikipedia: Found image for "${searchTerm}": ${imageInfo.url}`);
+      await this.cacheWikipediaUrl(searchTerm, imageInfo.url);
+      return imageInfo.url;
+      
+    } catch (error) {
+      console.warn('Error fetching from Wikipedia:', error);
+      return null;
     }
   }
 
@@ -179,16 +328,20 @@ export class ImageService {
     return Math.abs(hash).toString();
   }
 
-  // Main method to get image URL for an animal
-  public async getImageUrl(animal: AnimalData, bypassCache: boolean = false): Promise<string> {
+  // Main method to get image source for an animal (can return local asset or URL string)
+  public async getImageUrl(animal: AnimalData, bypassCache: boolean = false): Promise<string | any> {
     try {
       console.log(`ImageService: Getting image for ${animal.name} (${animal.searchTerm})${bypassCache ? ' [bypassing cache]' : ''}`);
       
-      // First try local asset
-      const localPath = this.getLocalAssetPath(animal);
-      if (localPath) {
-        console.log(`ImageService: Using local path for ${animal.name}: ${localPath}`);
-        return localPath;
+      // First try local asset (unless bypassing cache for reload)
+      if (!bypassCache) {
+        const localAsset = this.getLocalAssetPath(animal);
+        if (localAsset) {
+          console.log(`ImageService: Using local asset for ${animal.name}: ${animal.localAsset}`);
+          return localAsset;
+        }
+      } else {
+        console.log(`ImageService: Bypassing local asset for ${animal.name} to fetch new image`);
       }
 
       // Then try cache (unless bypassing)
@@ -198,9 +351,23 @@ export class ImageService {
           console.log(`ImageService: Using cached URL for ${animal.name}: ${cachedUrl}`);
           return cachedUrl;
         }
+        
+        const cachedWikiUrl = await this.getCachedWikipediaUrl(animal.searchTerm);
+        if (cachedWikiUrl) {
+          console.log(`ImageService: Using cached Wikipedia URL for ${animal.name}: ${cachedWikiUrl}`);
+          return cachedWikiUrl;
+        }
       }
 
-      // Finally fetch from API
+      // Try Wikipedia as secondary source
+      console.log(`ImageService: Fetching from Wikipedia for ${animal.name}`);
+      const wikiUrl = await this.fetchFromWikipedia(animal.searchTerm);
+      if (wikiUrl) {
+        console.log(`ImageService: Got Wikipedia URL for ${animal.name}: ${wikiUrl}`);
+        return wikiUrl;
+      }
+
+      // Finally fetch from Pexels API as tertiary fallback
       console.log(`ImageService: Fetching from Pexels for ${animal.name}`);
       const apiUrl = await this.fetchFromPexels(animal.searchTerm, bypassCache);
       if (apiUrl) {
@@ -231,7 +398,9 @@ export class ImageService {
   public async clearImageCache(): Promise<void> {
     try {
       const keys = await AsyncStorage.getAllKeys();
-      const cacheKeys = keys.filter(key => key.startsWith(IMAGE_CACHE_PREFIX));
+      const cacheKeys = keys.filter(key => 
+        key.startsWith(IMAGE_CACHE_PREFIX) || key.startsWith(WIKIPEDIA_CACHE_PREFIX)
+      );
       await AsyncStorage.multiRemove(cacheKeys);
     } catch (error) {
       console.warn('Error clearing image cache:', error);

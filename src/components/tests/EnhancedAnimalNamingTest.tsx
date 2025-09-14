@@ -26,7 +26,7 @@ type Phase = 'config' | 'loading' | 'testing' | 'result';
 export default function EnhancedAnimalNamingTest({ onComplete, onCancel }: EnhancedAnimalNamingTestProps) {
   const [phase, setPhase] = useState<Phase>('config');
   const [animals, setAnimals] = useState<AnimalData[]>([]);
-  const [imageUrls, setImageUrls] = useState<{ [key: string]: string }>({});
+  const [imageUrls, setImageUrls] = useState<{ [key: string]: string | any }>({});
   const [currentIndex, setCurrentIndex] = useState(0);
   const [answers, setAnswers] = useState<string[]>([]);
   const [currentInput, setCurrentInput] = useState('');
@@ -35,6 +35,17 @@ export default function EnhancedAnimalNamingTest({ onComplete, onCancel }: Enhan
   const [loadingProgress, setLoadingProgress] = useState(0);
   const [isReloadingImage, setIsReloadingImage] = useState(false);
   const inputRef = useRef<TextInput>(null);
+
+  // Helper function to get proper image source for Expo Image component
+  const getImageSource = (imageData: string | any) => {
+    if (typeof imageData === 'string') {
+      // URL string - use { uri: ... } format
+      return { uri: imageData };
+    } else {
+      // Local asset - return the require object directly
+      return imageData;
+    }
+  };
 
   // Fuzzy matching for user input
   const normalizeAnswer = (input: string): string => {
@@ -56,26 +67,26 @@ export default function EnhancedAnimalNamingTest({ onComplete, onCancel }: Enhan
   // Load images for selected animals
   const loadImages = async (selectedAnimals: AnimalData[]) => {
     setLoadingProgress(0);
-    const urls: { [key: string]: string } = {};
+    const imageData: { [key: string]: string | any } = {};
     
     for (let i = 0; i < selectedAnimals.length; i++) {
       const animal = selectedAnimals[i];
       try {
         console.log(`Loading image for ${animal.name} (${animal.searchTerm})`);
-        const imageUrl = await ImageService.getImageUrl(animal);
-        console.log(`Got image URL for ${animal.name}: ${imageUrl}`);
-        urls[animal.id] = imageUrl;
+        const imageSource = await ImageService.getImageUrl(animal);
+        console.log(`Got image source for ${animal.name}:`, typeof imageSource === 'string' ? imageSource : 'local asset');
+        imageData[animal.id] = imageSource;
       } catch (error) {
         console.warn(`Failed to load image for ${animal.name}:`, error);
         // Use Robohash as fallback - creates unique images per animal name
         const encodedName = encodeURIComponent(animal.name);
-        urls[animal.id] = `https://robohash.org/${encodedName}?set=set4&size=400x400`;
+        imageData[animal.id] = `https://robohash.org/${encodedName}?set=set4&size=400x400`;
       }
       setLoadingProgress((i + 1) / selectedAnimals.length);
     }
     
-    console.log('All image URLs loaded:', urls);
-    setImageUrls(urls);
+    console.log('All image sources loaded:', imageData);
+    setImageUrls(imageData);
   };
 
   // Reload current image with a fresh fetch
@@ -95,19 +106,19 @@ export default function EnhancedAnimalNamingTest({ onComplete, onCancel }: Enhan
     setIsReloadingImage(true);
     try {
       const currentAnimal = animals[currentIndex];
-      const oldImageUrl = imageUrls[currentAnimal.id];
-      console.log(`Reloading image for ${currentAnimal.name}, old URL: ${oldImageUrl}`);
+      const oldImageSource = imageUrls[currentAnimal.id];
+      console.log(`Reloading image for ${currentAnimal.name}, old source:`, typeof oldImageSource === 'string' ? oldImageSource : 'local asset');
       
       // Fetch a new image bypassing cache
-      const newImageUrl = await ImageService.getImageUrl(currentAnimal, true);
-      console.log(`Got new image URL: ${newImageUrl}`);
+      const newImageSource = await ImageService.getImageUrl(currentAnimal, true);
+      console.log(`Got new image source:`, typeof newImageSource === 'string' ? newImageSource : 'local asset');
       
-      if (newImageUrl !== oldImageUrl) {
-        // Update the image URLs state
+      if (newImageSource !== oldImageSource) {
+        // Update the image sources state
         setImageUrls(prev => {
           const updated = {
             ...prev,
-            [currentAnimal.id]: newImageUrl
+            [currentAnimal.id]: newImageSource
           };
           console.log('Updated imageUrls state:', updated);
           return updated;
@@ -115,7 +126,7 @@ export default function EnhancedAnimalNamingTest({ onComplete, onCancel }: Enhan
         
         console.log(`Image successfully reloaded for ${currentAnimal.name}`);
       } else {
-        console.log('New image URL is the same as old one');
+        console.log('New image source is the same as old one');
       }
     } catch (error) {
       console.warn('Error reloading image:', error);
@@ -287,7 +298,7 @@ export default function EnhancedAnimalNamingTest({ onComplete, onCancel }: Enhan
               {animals.map((animal, index) => (
                 <View key={animal.id} style={styles.resultItem}>
                   <Image 
-                    source={{ uri: imageUrls[animal.id] }} 
+                    source={getImageSource(imageUrls[animal.id])} 
                     style={styles.resultImage} 
                     contentFit="cover"
                   />
@@ -361,7 +372,7 @@ export default function EnhancedAnimalNamingTest({ onComplete, onCancel }: Enhan
         keyboardShouldPersistTaps="handled"
       >
         <View style={styles.testHeader}>
-          <Text style={styles.progressText}>
+          <Text style={styles.testProgressText}>
             Animal {currentIndex + 1} / {animals.length}
           </Text>
           <Text style={styles.difficultyIndicator}>
@@ -373,7 +384,7 @@ export default function EnhancedAnimalNamingTest({ onComplete, onCancel }: Enhan
           {imageUrls[currentAnimal.id] ? (
             <>
               <Image 
-                source={{ uri: imageUrls[currentAnimal.id] }} 
+                source={getImageSource(imageUrls[currentAnimal.id])} 
                 style={styles.animalImage}
                 contentFit="cover"
               />
@@ -522,7 +533,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 20,
   },
-  progressText: {
+  testProgressText: {
     fontSize: 16,
     color: '#6b7280',
     marginBottom: 4,

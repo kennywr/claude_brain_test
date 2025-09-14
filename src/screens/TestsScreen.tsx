@@ -6,13 +6,15 @@ import NBackTest from '../components/tests/NBackTest';
 import DigitSpanTest from '../components/tests/DigitSpanTest';
 import StroopTest from '../components/tests/StroopTest';
 import EnhancedAnimalNamingTest from '../components/tests/EnhancedAnimalNamingTest';
+import DebugMenu from '../components/debug/DebugMenu';
 import { addResult } from '../utils/storage';
 import { TEST_DEFINITIONS } from '../utils/testUtils';
 
-type ActiveTest = null | 'rt' | 'nback' | 'digit' | 'stroop' | 'animal';
+type ActiveTest = null | 'rt' | 'nback' | 'digit' | 'stroop' | 'animal' | 'debug';
 
 export default function TestsScreen() {
   const [activeTest, setActiveTest] = useState<ActiveTest>(null);
+  const [debugPressCount, setDebugPressCount] = useState(0);
 
   const handleTestComplete = async (testId: string, result: any) => {
     try {
@@ -28,6 +30,23 @@ export default function TestsScreen() {
 
   const handleTestCancel = () => {
     setActiveTest(null);
+  };
+
+  // Debug mode activation - tap title 5 times quickly
+  const handleTitlePress = () => {
+    const newCount = debugPressCount + 1;
+    setDebugPressCount(newCount);
+    
+    if (newCount >= 5) {
+      setActiveTest('debug');
+      setDebugPressCount(0);
+      Alert.alert('Debug Mode', 'Entering debug menu...');
+    } else {
+      // Reset counter after 2 seconds if not reached
+      setTimeout(() => {
+        setDebugPressCount(0);
+      }, 2000);
+    }
   };
 
   if (activeTest === 'rt') {
@@ -75,11 +94,23 @@ export default function TestsScreen() {
     );
   }
 
+  if (activeTest === 'debug') {
+    return (
+      <DebugMenu
+        onClose={handleTestCancel}
+      />
+    );
+  }
+
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.header}>
-          <Text style={styles.title}>Cognitive Tests</Text>
+          <TouchableOpacity onPress={handleTitlePress} activeOpacity={0.8}>
+            <Text style={[styles.title, debugPressCount > 0 && styles.titleDebug]}>
+              Cognitive Tests {debugPressCount > 0 && `(${debugPressCount}/5)`}
+            </Text>
+          </TouchableOpacity>
           <Text style={styles.subtitle}>Run mental clarity assessments</Text>
         </View>
         
@@ -146,6 +177,9 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#1f2937',
     marginBottom: 8,
+  },
+  titleDebug: {
+    color: '#3b82f6',
   },
   subtitle: {
     fontSize: 16,

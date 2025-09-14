@@ -5,11 +5,14 @@ export interface AnimalData {
   difficulty: 1 | 2 | 3;  // 1=Easy, 2=Medium, 3=Hard
   category: 'mammal' | 'bird' | 'reptile' | 'amphibian' | 'fish' | 'insect' | 'other';
   commonality: number;    // How familiar (1-10, 10=most common)
-  localAsset?: string;    // Local image path for core animals
+  localAsset?: string;    // Relative path to local image asset from assets/images/animals/core/
   searchTerm: string;     // Term to use for API image search
 }
 
-// Core 50 animals - these will have local assets for optimal performance
+// Core animals - 30 have local assets for optimal performance, others use API loading
+// Animals with local assets: bear, bird, butterfly, cat, chicken, cow, deer, dog, dolphin, duck, 
+// eagle, elephant, fish, frog, giraffe, horse, lion, monkey, mouse, owl, penguin, pig, rabbit, 
+// shark, sheep, spider, tiger, whale, wolf, zebra
 export const CORE_ANIMALS: AnimalData[] = [
   // EASY ANIMALS (commonality 8-10)
   { id: 'cat', name: 'Cat', synonyms: ['kitten', 'feline'], difficulty: 1, category: 'mammal', commonality: 10, searchTerm: 'cat', localAsset: 'cat.jpg' },
@@ -38,29 +41,29 @@ export const CORE_ANIMALS: AnimalData[] = [
   { id: 'bear', name: 'Bear', synonyms: [], difficulty: 2, category: 'mammal', commonality: 7, searchTerm: 'bear', localAsset: 'bear.jpg' },
   { id: 'wolf', name: 'Wolf', synonyms: [], difficulty: 2, category: 'mammal', commonality: 6, searchTerm: 'wolf', localAsset: 'wolf.jpg' },
   { id: 'deer', name: 'Deer', synonyms: ['doe', 'buck'], difficulty: 2, category: 'mammal', commonality: 6, searchTerm: 'deer', localAsset: 'deer.jpg' },
-  { id: 'camel', name: 'Camel', synonyms: ['dromedary'], difficulty: 2, category: 'mammal', commonality: 5, searchTerm: 'camel', localAsset: 'camel.jpg' },
-  { id: 'rhinoceros', name: 'Rhinoceros', synonyms: ['rhino'], difficulty: 2, category: 'mammal', commonality: 5, searchTerm: 'rhinoceros', localAsset: 'rhinoceros.jpg' },
-  { id: 'hippopotamus', name: 'Hippopotamus', synonyms: ['hippo'], difficulty: 2, category: 'mammal', commonality: 5, searchTerm: 'hippopotamus', localAsset: 'hippopotamus.jpg' },
-  { id: 'kangaroo', name: 'Kangaroo', synonyms: [], difficulty: 2, category: 'mammal', commonality: 6, searchTerm: 'kangaroo', localAsset: 'kangaroo.jpg' },
+  { id: 'camel', name: 'Camel', synonyms: ['dromedary'], difficulty: 2, category: 'mammal', commonality: 5, searchTerm: 'camel' },
+  { id: 'rhinoceros', name: 'Rhinoceros', synonyms: ['rhino'], difficulty: 2, category: 'mammal', commonality: 5, searchTerm: 'rhinoceros', localAsset: 'rhino.jpg' },
+  { id: 'hippopotamus', name: 'Hippopotamus', synonyms: ['hippo'], difficulty: 2, category: 'mammal', commonality: 5, searchTerm: 'hippopotamus', localAsset: 'hippo.jpg' },
+  { id: 'kangaroo', name: 'Kangaroo', synonyms: [], difficulty: 2, category: 'mammal', commonality: 6, searchTerm: 'kangaroo' },
   { id: 'penguin', name: 'Penguin', synonyms: [], difficulty: 2, category: 'bird', commonality: 6, searchTerm: 'penguin', localAsset: 'penguin.jpg' },
   { id: 'owl', name: 'Owl', synonyms: [], difficulty: 2, category: 'bird', commonality: 6, searchTerm: 'owl', localAsset: 'owl.jpg' },
   { id: 'eagle', name: 'Eagle', synonyms: [], difficulty: 2, category: 'bird', commonality: 6, searchTerm: 'eagle', localAsset: 'eagle.jpg' },
   { id: 'shark', name: 'Shark', synonyms: [], difficulty: 2, category: 'fish', commonality: 6, searchTerm: 'shark', localAsset: 'shark.jpg' },
   { id: 'whale', name: 'Whale', synonyms: [], difficulty: 2, category: 'mammal', commonality: 6, searchTerm: 'whale', localAsset: 'whale.jpg' },
   { id: 'dolphin', name: 'Dolphin', synonyms: [], difficulty: 2, category: 'mammal', commonality: 6, searchTerm: 'dolphin', localAsset: 'dolphin.jpg' },
-  { id: 'octopus', name: 'Octopus', synonyms: [], difficulty: 2, category: 'other', commonality: 5, searchTerm: 'octopus', localAsset: 'octopus.jpg' },
+  { id: 'octopus', name: 'Octopus', synonyms: [], difficulty: 2, category: 'other', commonality: 5, searchTerm: 'octopus' },
 
-  // HARD ANIMALS (commonality 2-4)
-  { id: 'pangolin', name: 'Pangolin', synonyms: [], difficulty: 3, category: 'mammal', commonality: 2, searchTerm: 'pangolin', localAsset: 'pangolin.jpg' },
-  { id: 'quokka', name: 'Quokka', synonyms: [], difficulty: 3, category: 'mammal', commonality: 2, searchTerm: 'quokka', localAsset: 'quokka.jpg' },
-  { id: 'capybara', name: 'Capybara', synonyms: [], difficulty: 3, category: 'mammal', commonality: 3, searchTerm: 'capybara', localAsset: 'capybara.jpg' },
-  { id: 'axolotl', name: 'Axolotl', synonyms: [], difficulty: 3, category: 'amphibian', commonality: 2, searchTerm: 'axolotl', localAsset: 'axolotl.jpg' },
-  { id: 'numbat', name: 'Numbat', synonyms: [], difficulty: 3, category: 'mammal', commonality: 2, searchTerm: 'numbat', localAsset: 'numbat.jpg' },
-  { id: 'tapir', name: 'Tapir', synonyms: [], difficulty: 3, category: 'mammal', commonality: 2, searchTerm: 'tapir', localAsset: 'tapir.jpg' },
-  { id: 'okapi', name: 'Okapi', synonyms: [], difficulty: 3, category: 'mammal', commonality: 2, searchTerm: 'okapi', localAsset: 'okapi.jpg' },
-  { id: 'aardvark', name: 'Aardvark', synonyms: [], difficulty: 3, category: 'mammal', commonality: 2, searchTerm: 'aardvark', localAsset: 'aardvark.jpg' },
-  { id: 'echidna', name: 'Echidna', synonyms: [], difficulty: 3, category: 'mammal', commonality: 2, searchTerm: 'echidna', localAsset: 'echidna.jpg' },
-  { id: 'platypus', name: 'Platypus', synonyms: [], difficulty: 3, category: 'mammal', commonality: 3, searchTerm: 'platypus', localAsset: 'platypus.jpg' },
+  // HARD ANIMALS (commonality 2-4) - No local assets, will use API loading
+  { id: 'pangolin', name: 'Pangolin', synonyms: [], difficulty: 3, category: 'mammal', commonality: 2, searchTerm: 'pangolin' },
+  { id: 'quokka', name: 'Quokka', synonyms: [], difficulty: 3, category: 'mammal', commonality: 2, searchTerm: 'quokka' },
+  { id: 'capybara', name: 'Capybara', synonyms: [], difficulty: 3, category: 'mammal', commonality: 3, searchTerm: 'capybara' },
+  { id: 'axolotl', name: 'Axolotl', synonyms: [], difficulty: 3, category: 'amphibian', commonality: 2, searchTerm: 'axolotl' },
+  { id: 'numbat', name: 'Numbat', synonyms: [], difficulty: 3, category: 'mammal', commonality: 2, searchTerm: 'numbat' },
+  { id: 'tapir', name: 'Tapir', synonyms: [], difficulty: 3, category: 'mammal', commonality: 2, searchTerm: 'tapir' },
+  { id: 'okapi', name: 'Okapi', synonyms: [], difficulty: 3, category: 'mammal', commonality: 2, searchTerm: 'okapi' },
+  { id: 'aardvark', name: 'Aardvark', synonyms: [], difficulty: 3, category: 'mammal', commonality: 2, searchTerm: 'aardvark' },
+  { id: 'echidna', name: 'Echidna', synonyms: [], difficulty: 3, category: 'mammal', commonality: 2, searchTerm: 'echidna' },
+  { id: 'platypus', name: 'Platypus', synonyms: [], difficulty: 3, category: 'mammal', commonality: 3, searchTerm: 'platypus' },
 ];
 
 // Extended animals - these will be loaded via API
@@ -210,4 +213,12 @@ export function getCoreAnimals(): AnimalData[] {
 
 export function getExtendedAnimals(): AnimalData[] {
   return EXTENDED_ANIMALS;
+}
+
+export function getAnimalsWithLocalAssets(): AnimalData[] {
+  return getAllAnimals().filter(animal => animal.localAsset);
+}
+
+export function getAnimalsWithoutLocalAssets(): AnimalData[] {
+  return getAllAnimals().filter(animal => !animal.localAsset);
 }

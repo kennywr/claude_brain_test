@@ -1,0 +1,14 @@
+# Core Animal Images Directory
+
+This directory contains local fallback images for the 30 most commonly used animals in the Animal Naming Test.
+
+Current placeholder files will be replaced with actual high-quality images:
+- 15 Easy animals (cat, dog, cow, horse, pig, sheep, chicken, duck, fish, rabbit, bird, mouse, frog, butterfly, spider)
+- 15 Medium animals (lion, tiger, elephant, giraffe, zebra, monkey, bear, wolf, deer, penguin, owl, eagle, shark, whale, dolphin)
+
+Image specifications:
+- Format: JPG preferred (PNG if transparency needed)
+- Resolution: 512x512px minimum, 1024x1024px preferred  
+- Quality: High quality, clear representation
+- File size: <200KB each
+- Background: Clean, minimal preferred
