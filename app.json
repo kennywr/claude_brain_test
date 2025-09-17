@@ -2,7 +2,7 @@
   "expo": {
     "name": "BraintestMobile",
     "slug": "BraintestMobile",
-    "version": "1.0.0",
+    "version": "1.4.2",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",

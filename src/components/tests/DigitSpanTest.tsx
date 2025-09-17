@@ -82,7 +82,9 @@ export default function DigitSpanTest({ onComplete, onCancel }: DigitSpanTestPro
   // Handle input change (only allow digits)
   const handleInputChange = (text: string) => {
     const digitsOnly = text.replace(/\D/g, '');
-    setInput(digitsOnly);
+    // Ensure we don't exceed the current span length
+    const limitedInput = digitsOnly.slice(0, span);
+    setInput(limitedInput);
   };
 
   // Results phase
@@ -173,7 +175,6 @@ export default function DigitSpanTest({ onComplete, onCancel }: DigitSpanTestPro
               placeholder="Type the digits"
               placeholderTextColor="#9ca3af"
               keyboardType="numeric"
-              maxLength={span}
               textAlign="center"
               onSubmitEditing={submit}
               autoFocus
